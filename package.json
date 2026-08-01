@@ -1,0 +1,13 @@
+{
+  "name": "sweet-workbench",
+  "version": "1.0.0",
+  "description": "甜蜜工作台 PWA + 视频做法分析后端（Node 一体化服务）",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --env-file=.env server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
