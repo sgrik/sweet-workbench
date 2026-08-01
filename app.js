@@ -32,6 +32,11 @@
     return null;
   }
 
+  // 确保 togetherDate 存在（兼容旧版数据）
+  function ensureTogetherDate() {
+    if (!appData.togetherDate) appData.togetherDate = '2025-10-20';
+  }
+
   function saveData() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
@@ -91,7 +96,8 @@
         { id: 'seed-tl-2', date: '2025.11.11', title: '第一次旅行', desc: '杭州西湖，第一次一起出远门', active: false },
         { id: 'seed-tl-3', date: '2026.02.14', title: '第一个情人节', desc: '烛光晚餐，属于我们的浪漫', active: false },
         { id: 'seed-tl-4', date: '2026.05.20', title: '海边纪念日', desc: '鼓浪屿日落，我们的专属纪念日', active: false }
-      ]
+      ],
+      togetherDate: '2025-10-20'
     };
   }
 
@@ -166,19 +172,47 @@
   }
   updateGreeting();
 
-  // 在一起天数（从 2025-10-20 起）
+  // 在一起天数（可自定义起始日期）
+  ensureTogetherDate();
   function getDays() {
-    const start = new Date('2025-10-20');
-    const now = new Date();
+    var start = new Date(appData.togetherDate || '2025-10-20');
+    var now = new Date();
     return Math.max(1, Math.floor((now - start) / 86400000) + 1);
   }
-  const togetherDays = getDays();
-  const daysEl = $('#daysCount');
-  if (daysEl) daysEl.textContent = togetherDays;
-  const usDaysEl = $('#usDays');
-  if (usDaysEl) usDaysEl.textContent = togetherDays;
-  const profileMeta = $('.profile-meta');
-  if (profileMeta) profileMeta.textContent = '在一起 ' + togetherDays + ' 天';
+  function fmtDateCN(dateStr) {
+    var d = new Date(dateStr);
+    return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
+  }
+  function getNextMilestone(days) {
+    var milestones = [100, 200, 300, 365, 500, 600, 700, 800, 900, 1000, 1500, 2000, 3000, 5000];
+    for (var i = 0; i < milestones.length; i++) {
+      if (milestones[i] > days) return milestones[i];
+    }
+    return null;
+  }
+  function updateTogetherDisplay() {
+    var togetherDays = getDays();
+    var daysEl = $('#daysCount');
+    if (daysEl) daysEl.textContent = togetherDays;
+    var usDaysEl = $('#usDays');
+    if (usDaysEl) usDaysEl.textContent = togetherDays;
+    var profileMeta = $('.profile-meta');
+    if (profileMeta) profileMeta.textContent = '在一起 ' + togetherDays + ' 天';
+    var subtitleEl = $('#usHeroSubtitle');
+    if (subtitleEl) subtitleEl.textContent = '我们始于 ' + fmtDateCN(appData.togetherDate);
+    var pillEl = $('#usHeroPill');
+    if (pillEl) {
+      var ms = getNextMilestone(togetherDays);
+      if (ms) {
+        var startDate = new Date(appData.togetherDate);
+        var msDate = new Date(startDate.getTime() + (ms - 1) * 86400000);
+        pillEl.textContent = '下一个纪念日：' + ms + '天 · ' + (msDate.getMonth() + 1) + '月' + msDate.getDate() + '日';
+      } else {
+        pillEl.textContent = '每一天都是纪念日';
+      }
+    }
+  }
+  updateTogetherDisplay();
 
   // ========== 页面切换 ==========
   const screens = {
@@ -1510,6 +1544,11 @@
     });
     // 悄悄话不在此同步（走独立的 whisper 端点），但确保数组存在
     if (!Array.isArray(appData.whispers)) appData.whispers = [];
+    // 同步在一起日期
+    if (srvData.togetherDate && srvData.togetherDate !== appData.togetherDate) {
+      appData.togetherDate = srvData.togetherDate;
+      changed = true;
+    }
     return changed;
   }
 
@@ -1531,6 +1570,8 @@
     updateTodoCount();
     updateFoodCount();
     updateTravelCount();
+    // 在一起天数刷新（对方可能改了日期）
+    updateTogetherDisplay();
     // 足迹地图重新打点
     if (typeof placeMarkers !== 'undefined' && typeof travelLeafletMap !== 'undefined') {
       Object.values(placeMarkers).forEach(function (m) { travelLeafletMap.removeLayer(m); });
@@ -2194,6 +2235,30 @@
         if (travelLeafletMap) travelLeafletMap.setView([g[0], g[1]], 10);
         updateMapEmpty();
         pendingMapPoint = null;
+        return true;
+      }
+    },
+
+    'edit-together-date': {
+      title: '设置在一起日期',
+      successMsg: '在一起日期已更新',
+      body: `
+        <div class="form-field">
+          <label class="form-label">选择你们在一起的日期</label>
+          <input class="form-input" type="date" id="f-together-date">
+        </div>
+        <p style="font-size:13px;color:#888;margin-top:8px;line-height:1.5;">设置后，首页和"我们"页的天数会自动更新。如果已连接暗号，对方也会同步看到新日期。</p>
+      `,
+      onMount(c) {
+        ensureTogetherDate();
+        $('#f-together-date', c).value = appData.togetherDate;
+      },
+      onSubmit(c) {
+        var val = $('#f-together-date', c).value;
+        if (!val) { showToast('请选择日期'); return false; }
+        appData.togetherDate = val;
+        saveData();
+        updateTogetherDisplay();
         return true;
       }
     }
