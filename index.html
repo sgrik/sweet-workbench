@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#5B9BD5">
+  <title>甜蜜工作台</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="styles.css?v=18">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%235B9BD5'/%3E%3Cpath d='M90 130s-35-20-35-42c0-9 7-16 16-16 6 0 12 3 15 8 3-5 9-8 15-8 9 0 16 7 16 16 0 22-35 42-35 42z' fill='white'/%3E%3C/svg%3E">
+</head>
+<body>
+  <div id="app" class="app">
+    <!-- 状态栏 -->
+    <div class="status-bar">
+      <span class="status-time" id="statusTime">9:41</span>
+      <div class="status-icons">
+        <svg class="status-icon" viewBox="0 0 18 12" fill="currentColor"><path d="M1 8h2v2H1zm4-2h2v4H5zm4-3h2v7H9zm4-3h2v10h-2z"/></svg>
+        <svg class="status-icon" viewBox="0 0 16 12" fill="currentColor"><path d="M8 0C4.5 0 1.6 2.1.4 5.1c-.2.5.1 1 .6 1h14c.5 0 .8-.5.6-1C14.4 2.1 11.5 0 8 0zm0 9c-1.7 0-3.2-.8-4.2-2h8.4C11.2 8.2 9.7 9 8 9z"/></svg>
+        <svg class="status-icon" viewBox="0 0 24 12" fill="currentColor"><rect x="2" y="2" width="18" height="8" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="4" y="4" width="14" height="4" rx="1"/></svg>
+      </div>
+    </div>
+
+    <!-- 页面容器 -->
+    <main class="screens">
+      <!-- 1. 首页 -->
+      <section id="screen-home" class="screen screen-home active">
+        <div class="home-header">
+          <div class="header-left">
+            <div class="greeting" id="greetingText">早安，小宝</div>
+            <div class="date" id="dateText">--</div>
+          </div>
+          <div class="avatar"></div>
+        </div>
+
+        <div class="hero-card">
+          <div class="hero-label">在一起</div>
+          <div class="hero-number-row">
+            <span class="hero-number" id="daysCount">286</span>
+            <span class="hero-unit">天</span>
+          </div>
+          <svg class="heart-decor" viewBox="0 0 28 28" fill="none"><path d="M14 24.5s-9.5-5.5-9.5-11.5c0-2.5 2-4.5 4.5-4.5 1.7 0 3.2.9 4 2.3.8-1.4 2.3-2.3 4-2.3 2.5 0 4.5 2 4.5 4.5 0 6-9.5 11.5-9.5 11.5z" fill="rgba(255,255,255,0.30)"/></svg>
+        </div>
+
+        <div class="quick-actions">
+          <div class="qa-item tap" data-target="medication">
+            <div class="qa-icon qa-medication">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#5B9BD5" stroke-width="2"><path d="M10.5 4.5l9 9a3.5 3.5 0 0 1-5 5l-9-9a3.5 3.5 0 0 1 5-5z"/><path d="M8 8l8 8"/></svg>
+            </div>
+            <span>用药提醒</span>
+          </div>
+          <div class="qa-item tap" data-target="eczema">
+            <div class="qa-icon qa-eczema">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6B85A5" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/><path d="M8 12h.01M12 8h.01M16 12h.01M12 16h.01"/></svg>
+            </div>
+            <span>湿疹记录</span>
+          </div>
+          <div class="qa-item tap" data-target="us">
+            <div class="qa-icon qa-timeline">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6B85A5" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+            </div>
+            <span>时间轴</span>
+          </div>
+          <div class="qa-item tap" data-target="us">
+            <div class="qa-icon qa-whisper">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6B85A5" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <span>悄悄话</span>
+          </div>
+        </div>
+
+        <div class="medication-preview card">
+          <div class="card-header">
+            <span class="card-title">今日用药</span>
+            <span class="card-link tap" data-target="medication">查看全部</span>
+          </div>
+          <div id="homeMedList">
+            <div class="med-item">
+              <div class="med-icon med-vitamin"></div>
+              <div class="med-info">
+                <div class="med-name">维生素D</div>
+                <div class="med-desc"><span class="med-time">早饭后</span><span class="med-dose">1片</span></div>
+              </div>
+              <button class="med-status pending" type="button">未服</button>
+            </div>
+            <div class="med-item med-done">
+              <div class="med-icon med-calcium"></div>
+              <div class="med-info">
+                <div class="med-name">钙片</div>
+                <div class="med-desc"><span class="med-time">午饭后</span><span class="med-dose">2片</span></div>
+              </div>
+              <button class="med-status done" type="button">已服</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. 用药清单 -->
+      <section id="screen-medication" class="screen screen-medication">
+        <div class="page-header">
+          <div class="header-left">
+            <div class="page-title">用药清单</div>
+            <div class="page-subtitle" id="medSubtitle">8月2日 今日</div>
+          </div>
+          <button class="add-btn" data-action="add-medication" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+
+        <div class="calendar-card card">
+          <div class="calendar-header">
+            <span class="card-title">近7天服药</span>
+            <span class="calendar-rate">86%</span>
+          </div>
+          <div class="calendar-week">
+            <div class="day"><span>三</span><div class="day-dot active"></div></div>
+            <div class="day"><span>四</span><div class="day-dot active"></div></div>
+            <div class="day"><span>五</span><div class="day-dot active"></div></div>
+            <div class="day"><span>六</span><div class="day-dot active"></div></div>
+            <div class="day"><span>日</span><div class="day-dot"></div></div>
+            <div class="day"><span>一</span><div class="day-dot active"></div></div>
+            <div class="day today"><span>今</span><div class="day-dot active"></div></div>
+          </div>
+        </div>
+
+        <div id="medSections">
+          <div class="section-header">
+            <div class="section-indicator red"></div>
+            <span>未服 · <span id="medPendingCount">1</span></span>
+          </div>
+          <div class="med-list-card card" data-id="seed-med-1">
+            <div class="med-icon med-vitamin"></div>
+            <div class="med-info">
+              <div class="med-name">维生素D</div>
+              <div class="med-desc">早饭后 · 1片</div>
+            </div>
+            <button class="med-status pending" type="button">未服</button>
+          </div>
+
+          <div class="section-header">
+            <div class="section-indicator green"></div>
+            <span>已服 · <span id="medDoneCount">1</span></span>
+          </div>
+          <div class="med-list-card card" data-id="seed-med-2">
+            <div class="med-icon med-calcium"></div>
+            <div class="med-info">
+              <div class="med-name">钙片</div>
+              <div class="med-desc">午饭后 · 2片</div>
+            </div>
+            <button class="med-status done" type="button">已服</button>
+          </div>
+        </div>
+        <div class="empty-state" id="medEmpty" style="display:none">
+          <svg viewBox="0 0 64 64" fill="none" stroke="#C8D4DE" stroke-width="2"><circle cx="32" cy="32" r="28"/><path d="M22 32h20M32 22v20"/></svg>
+          <p>暂无用药记录</p>
+          <span>点击右上角 + 添加</span>
+        </div>
+      </section>
+
+      <!-- 3. 湿疹观察 -->
+      <section id="screen-eczema" class="screen screen-eczema">
+        <div class="page-header">
+          <div class="header-left">
+            <div class="page-title">湿疹观察</div>
+            <div class="page-subtitle" id="eczemaSubtitle">8月2日 今日</div>
+          </div>
+          <button class="add-btn" data-action="add-eczema" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+
+        <div class="status-card card bordered-coral" id="eczemaStatusCard">
+          <div class="status-card-header">
+            <span class="status-title">爆发中第3天</span>
+            <span class="status-tag warning">建议复诊</span>
+          </div>
+          <div class="severity-row">
+            <span class="severity-number" id="eczemaSeverity">3.5</span>
+            <span class="severity-unit">/5</span>
+          </div>
+          <div class="severity-bar"><div class="severity-fill" id="eczemaSeverityBar" style="width: 70%"></div></div>
+          <div class="stage-tags">
+            <span class="stage-tag active">爆发期</span>
+            <span class="stage-tag">好转期</span>
+            <span class="stage-tag">恢复期</span>
+            <span class="stage-tag">反复</span>
+          </div>
+        </div>
+
+        <div class="trend-card card">
+          <div class="card-header">
+            <span class="card-title">严重度趋势</span>
+            <span class="card-subtitle">近14天</span>
+          </div>
+          <div class="trend-chart">
+            <svg viewBox="0 0 300 120" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="rgba(91,155,213,0.2)"/>
+                  <stop offset="100%" stop-color="rgba(91,155,213,0)"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,90 L30,85 L60,70 L90,75 L120,55 L150,60 L180,45 L210,50 L240,35 L270,40 L300,25" fill="none" stroke="#5B9BD5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M0,90 L30,85 L60,70 L90,75 L120,55 L150,60 L180,45 L210,50 L240,35 L270,40 L300,25 L300,120 L0,120 Z" fill="url(#trendGradient)"/>
+            </svg>
+          </div>
+        </div>
+
+        <div id="eczemaRecordsList">
+          <div class="record-card card" data-id="seed-eczema-1">
+            <div class="card-header">
+              <span class="card-title">今日记录</span>
+              <span class="card-subtitle">8月2日</span>
+            </div>
+            <div class="record-row">
+              <span class="record-label">严重程度</span>
+              <span class="record-value coral">3.5/5</span>
+            </div>
+            <div class="record-row">
+              <span class="record-label">当前阶段</span>
+              <span class="stage-pill active">爆发期</span>
+            </div>
+            <div class="record-section">
+              <div class="record-label">部位</div>
+              <div class="body-parts">
+                <span>脸颊</span>
+                <span>额头</span>
+                <span>下巴</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="empty-state" id="eczemaEmpty" style="display:none">
+          <svg viewBox="0 0 64 64" fill="none" stroke="#C8D4DE" stroke-width="2"><circle cx="32" cy="32" r="28"/><path d="M22 32h20M32 22v20"/></svg>
+          <p>暂无湿疹记录</p>
+          <span>点击右上角 + 添加</span>
+        </div>
+      </section>
+
+      <!-- 4. 美食收藏 -->
+      <section id="screen-food" class="screen screen-food">
+        <div class="page-header">
+          <div class="header-left">
+            <div class="page-title">美食收藏</div>
+            <div class="page-subtitle" id="foodSubtitle">4道美食</div>
+          </div>
+          <button class="add-btn" data-action="add-food" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+
+        <div class="filter-row" data-filter-group="food">
+          <button class="filter-chip active" data-filter="all">全部</button>
+          <button class="filter-chip" data-filter="主食">主食</button>
+          <button class="filter-chip" data-filter="蔬菜">蔬菜</button>
+          <button class="filter-chip" data-filter="荤菜">荤菜</button>
+          <button class="filter-chip" data-filter="汤品">汤品</button>
+          <button class="filter-chip" data-filter="甜品">甜品</button>
+          <button class="filter-chip" data-filter="饮品">饮品</button>
+        </div>
+
+        <div class="food-grid" id="foodGrid"></div>
+        <div class="empty-state" id="foodEmpty" style="display:none">
+          <svg viewBox="0 0 64 64" fill="none" stroke="#C8D4DE" stroke-width="2"><circle cx="32" cy="32" r="28"/><path d="M22 32h20M32 22v20"/></svg>
+          <p>还没有收藏美食</p>
+          <span>点击右上角 + 添加</span>
+        </div>
+      </section>
+
+      <!-- 5. 待办页面 -->
+      <section id="screen-todo" class="screen screen-todo">
+        <div class="page-header">
+          <div class="header-left">
+            <div class="page-title">待办事项</div>
+            <div class="page-subtitle" id="todoSubtitle">5项待办</div>
+          </div>
+          <button class="add-btn" data-action="add-todo" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+
+        <div class="filter-row" data-filter-group="todo">
+          <button class="filter-chip active" data-filter="all">全部</button>
+          <button class="filter-chip" data-filter="今日">今日</button>
+          <button class="filter-chip" data-filter="本周">本周</button>
+          <button class="filter-chip warning" data-filter="已逾期">已逾期</button>
+        </div>
+
+        <div class="todo-list" id="todoList">
+          <div class="todo-card overdue" data-when="今日" data-id="seed-todo-1">
+            <div class="todo-check">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
+            </div>
+            <div class="todo-info">
+              <div class="todo-title">买生日蛋糕</div>
+              <div class="todo-meta">
+                <span class="todo-category family">家庭</span>
+                <span>今日 18:00 · 小宝</span>
+              </div>
+              <div class="todo-stars">★★★</div>
+            </div>
+            <span class="todo-badge overdue">已逾期</span>
+          </div>
+          <div class="todo-card" data-when="今日" data-id="seed-todo-2">
+            <div class="todo-check">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            </div>
+            <div class="todo-info">
+              <div class="todo-title">给妈妈打电话</div>
+              <div class="todo-meta">
+                <span class="todo-category family">家庭</span>
+                <span>14:00 · 我</span>
+              </div>
+              <div class="todo-stars">★★☆</div>
+            </div>
+          </div>
+          <div class="todo-card" data-when="本周" data-id="seed-todo-3">
+            <div class="todo-check">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            </div>
+            <div class="todo-info">
+              <div class="todo-title">预约牙医检查</div>
+              <div class="todo-meta">
+                <span class="todo-category health">健康</span>
+                <span>明天 09:00 · 小宝</span>
+              </div>
+              <div class="todo-stars">★★☆</div>
+            </div>
+          </div>
+          <div class="todo-card done" data-when="今日" data-id="seed-todo-4">
+            <div class="todo-check checked">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#5B9BD5"/><path d="M7 12l3 3 7-7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="todo-info">
+              <div class="todo-title">整理书房</div>
+              <div class="todo-meta">
+                <span class="todo-category family">家庭</span>
+                <span>已完成 · 小宝</span>
+              </div>
+              <div class="todo-stars">☆☆☆</div>
+            </div>
+          </div>
+        </div>
+        <div class="empty-state" id="todoEmpty" style="display:none">
+          <svg viewBox="0 0 64 64" fill="none" stroke="#C8D4DE" stroke-width="2"><circle cx="32" cy="32" r="28"/><path d="M22 32h20M32 22v20"/></svg>
+          <p>暂无待办事项</p>
+          <span>点击右上角 + 添加</span>
+        </div>
+      </section>
+
+      <!-- 6. 旅行页面 -->
+      <section id="screen-travel" class="screen screen-travel">
+        <div class="page-header">
+          <div class="header-left">
+            <div class="page-title">旅行回忆</div>
+            <div class="page-subtitle" id="travelSubtitle">共 2 段旅程</div>
+          </div>
+          <button class="add-btn" data-action="add-travel" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+
+        <div class="filter-row" data-filter-group="travel">
+          <button class="filter-chip active" data-filter="回忆">旅行回忆</button>
+          <button class="filter-chip" data-filter="心愿">心愿清单</button>
+          <button class="filter-chip" data-filter="照片">照片墙</button>
+          <button class="filter-chip" data-filter="地图">足迹地图</button>
+        </div>
+
+        <div class="travel-list" id="travelList">
+          <div class="memory-card" style="background: #4A7A9E;" data-id="seed-travel-1">
+            <div class="memory-location">杭州 · 西湖</div>
+            <div class="memory-title">秋日西湖骑行</div>
+            <div class="memory-date">2025.10.01 · 浪漫 · 骑行</div>
+          </div>
+          <div class="memory-card" style="background: #5A6B8E;" data-id="seed-travel-2">
+            <div class="memory-location">厦门 · 鼓浪屿</div>
+            <div class="memory-title">海边日落纪念日</div>
+            <div class="memory-date">2025.05.20 · 甜蜜 · 看海</div>
+          </div>
+        </div>
+        <div id="wishlistPanel" style="display:none">
+          <div class="wishlist-card card tap" data-action="add-travel">
+            <div class="wishlist-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#5B9BD5" stroke-width="2"><path d="M5 12h14M12 5v14"/></svg>
+            </div>
+            <div class="wishlist-info">
+              <div class="wishlist-title">添加心愿目的地</div>
+              <div class="wishlist-subtitle">下一个想去的地方</div>
+            </div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+        </div>
+        <div id="photoWallPanel" style="display:none">
+          <div class="empty-state">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#C8D4DE" stroke-width="2"><rect x="8" y="8" width="48" height="48" rx="6"/><circle cx="24" cy="28" r="5"/><path d="M8 44l16-12 12 10 8-6 12 8"/></svg>
+            <p>照片墙功能即将上线</p>
+            <span>敬请期待</span>
+          </div>
+        </div>
+        <div id="mapPanel" style="display:none">
+          <div class="map-search">
+            <input type="text" id="citySearch" placeholder="输入城市名自动定位，如：成都" maxlength="20" autocomplete="off">
+            <button id="citySearchBtn" type="button" aria-label="搜索城市">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="map-wrap">
+            <div class="travel-map" id="travelMap"></div>
+            <div class="map-error-banner" id="mapErrorBanner" style="display:none">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+              <span>地图底图加载失败（可能是跨域或版权限制），请检查网络或更换底图源。</span>
+            </div>
+            <div class="map-hint" id="mapHint">
+              <svg viewBox="0 0 48 48" fill="none" stroke="#7FA8C9" stroke-width="2"><path d="M24 6C16 6 10 12 10 20c0 10 14 22 14 22s14-12 14-22c0-8-6-14-14-14z"/><circle cx="24" cy="20" r="5"/></svg>
+              <p>搜索城市，或点击地图标记</p>
+              <span>记录你们去过的地方</span>
+            </div>
+          </div>
+          <p class="map-tip">轻触地图添加足迹 · 点击标记看详情/删除</p>
+        </div>
+        <div class="empty-state" id="travelEmpty" style="display:none">
+          <svg viewBox="0 0 64 64" fill="none" stroke="#C8D4DE" stroke-width="2"><circle cx="32" cy="32" r="28"/><path d="M22 32h20M32 22v20"/></svg>
+          <p>暂无旅行回忆</p>
+          <span>点击右上角 + 添加</span>
+        </div>
+      </section>
+
+      <!-- 7. 我们页面 -->
+      <section id="screen-us" class="screen screen-us">
+        <div class="page-header compact">
+          <div class="header-left">
+            <div class="page-title">我们</div>
+            <div class="page-subtitle">记录相爱的每一天</div>
+          </div>
+          <button class="header-btn settings-btn" data-target="settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+
+        <div class="us-hero-card">
+          <div class="us-hero-subtitle">我们始于 2025.10.20</div>
+          <div class="us-hero-title">在一起 <span id="usDays">286</span> 天</div>
+          <div class="us-hero-pill">下一个纪念日：100天 · 10月20日</div>
+        </div>
+
+        <div class="filter-row" data-filter-group="us">
+          <button class="filter-chip active" data-filter="时间轴">时间轴</button>
+          <button class="filter-chip" data-filter="悄悄话">悄悄话</button>
+        </div>
+
+        <div id="timelinePanel">
+          <div class="timeline" id="timelineList"></div>
+          <button class="us-add-fab" data-action="add-timeline" type="button" aria-label="添加时间轴记录">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+
+        <div id="whisperPanel" style="display:none">
+          <div class="whisper-pair" id="whisperPair">
+            <div class="wp-setup" id="wpSetup">
+              <div class="wp-title">🔒 专属暗号</div>
+              <div class="wp-desc">和另一半输入<strong>相同的暗号</strong>，就能两人实时互通悄悄话</div>
+              <div class="wp-row">
+                <input type="text" id="wpInput" placeholder="设置你们的暗号，如 5201314" maxlength="32" autocomplete="off">
+                <button type="button" id="wpConfirm">连接</button>
+              </div>
+            </div>
+            <div class="wp-connected" id="wpConnected" style="display:none">
+              <span class="wp-dot offline" id="wpDot"></span>
+              <span class="wp-code">暗号：<b id="wpCode"></b></span>
+              <button type="button" id="wpCopy" class="wp-mini">复制</button>
+              <button type="button" id="wpChange" class="wp-mini">更换</button>
+            </div>
+          </div>
+          <div class="whisper-chat" id="whisperChat"></div>
+          <div class="whisper-input-bar">
+            <input type="text" id="whisperInput" placeholder="写一句悄悄话…" maxlength="500">
+            <button id="whisperSend" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. 设置页面 -->
+      <section id="screen-settings" class="screen screen-settings">
+        <div class="page-header compact">
+          <div class="header-left">
+            <div class="page-title">设置</div>
+          </div>
+          <button class="header-btn back-btn" data-target="us">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="profile-card card">
+          <div class="profile-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-linecap="round"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="profile-info">
+            <div class="profile-name">小宝</div>
+            <div class="profile-meta">在一起 286 天</div>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+
+        <div class="settings-list">
+          <div class="setting-item card tap" id="settingExport">
+            <div class="setting-icon icon-export">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6B85A5" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            </div>
+            <div class="setting-info">
+              <div class="setting-title">数据导出</div>
+              <div class="setting-desc">导出所有记录为 JSON</div>
+            </div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+          <div class="setting-item card tap" id="settingEmergency">
+            <div class="setting-icon icon-emergency">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#5B9BD5" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </div>
+            <div class="setting-info">
+              <div class="setting-title">紧急联系人</div>
+              <div class="setting-desc" id="emergencyDesc">未设置</div>
+            </div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+          <div class="setting-item card tap" id="settingGift">
+            <div class="setting-icon icon-gift">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#8A85A5" stroke-width="2"><path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            </div>
+            <div class="setting-info">
+              <div class="setting-title">礼物灵感</div>
+              <div class="setting-desc">收藏送礼灵感</div>
+            </div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+          <div class="setting-item card tap danger" id="settingClear">
+            <div class="setting-icon icon-clear">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E57373" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </div>
+            <div class="setting-info">
+              <div class="setting-title">清除所有数据</div>
+              <div class="setting-desc">重置为初始状态</div>
+            </div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+        </div>
+
+        <div class="app-footer">
+          <p>甜蜜工作台 v1.0</p>
+          <p>用心记录每一天</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- 底部导航 -->
+    <nav class="tab-bar-container">
+      <div class="tab-bar-pill">
+        <button class="tab-item active" data-target="home">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9l-8-6-8 6v11a2 2 0 0 0 2 2h4v-7h4v7h4a2 2 0 0 0 2-2z"/></svg>
+          <span class="tab-label">健康</span>
+        </button>
+        <button class="tab-item" data-target="food">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.5 2 6 4.5 6 8c0 2.5 1.5 4.5 3 6v8h6v-8c1.5-1.5 3-3.5 3-6 0-3.5-2.5-6-6-6z"/><path d="M9 22h6"/></svg>
+          <span class="tab-label">美食</span>
+        </button>
+        <button class="tab-item" data-target="travel">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M2 12l4-4m-4 4l4 4"/><path d="M22 12h-2a2 2 0 0 0-2 2v2a2 2 0 0 1-2 2h-4"/></svg>
+          <span class="tab-label">旅行</span>
+        </button>
+        <button class="tab-item" data-target="us">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="17" cy="7" r="3"/><path d="M21 21v-2a3 3 0 0 0-3-3h-1"/></svg>
+          <span class="tab-label">伴侣</span>
+        </button>
+        <button class="tab-item" data-target="todo">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <span class="tab-label">备忘</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- 通用底部弹窗 -->
+  <div class="sheet-overlay" id="sheetOverlay"></div>
+  <div class="bottom-sheet" id="bottomSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <button class="sheet-cancel" id="sheetCancel">取消</button>
+      <span class="sheet-title" id="sheetTitle">添加</span>
+      <button class="sheet-confirm" id="sheetConfirm">确认</button>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+
+  <!-- 确认弹窗 -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-dialog">
+      <div class="confirm-title" id="confirmTitle">确认</div>
+      <div class="confirm-msg" id="confirmMsg">确定要执行此操作吗？</div>
+      <div class="confirm-actions">
+        <button class="confirm-btn cancel" id="confirmCancel">取消</button>
+        <button class="confirm-btn ok" id="confirmOk">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 美食详情弹窗 -->
+  <div class="food-detail-overlay" id="foodDetailOverlay">
+    <div class="food-detail-sheet" id="foodDetailSheet"></div>
+  </div>
+
+  <!-- 轻提示 -->
+  <div class="toast" id="toast"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js?v=18"></script>
+</body>
+</html>
