@@ -294,6 +294,21 @@ html, body {
   box-shadow: 0 6px 20px rgba(91, 155, 213, 0.22);
 }
 
+.hero-edit-icon {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 18px;
+  height: 18px;
+  opacity: 0.55;
+  transition: opacity 0.2s;
+}
+
+.hero-card:active .hero-edit-icon,
+.us-hero-card:active .hero-edit-icon {
+  opacity: 0.9;
+}
+
 .hero-label {
   font-size: 14px;
   font-weight: 500;
