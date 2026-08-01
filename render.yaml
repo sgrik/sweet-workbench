@@ -1,0 +1,19 @@
+# Render Blueprint — 甜蜜工作台 24h 云端部署
+# 使用方法：
+# 1. 将代码推到 GitHub 仓库
+# 2. 在 Render 控制台选择 New → Blueprint
+# 3. 选择该 GitHub 仓库，Render 会自动读取此文件
+services:
+  - type: web
+    name: sweet-workbench
+    runtime: node
+    plan: free
+    buildCommand: 'npm install'
+    startCommand: 'node server.js'
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: CLOUD_MODE
+        value: '1'
+      - key: NODE_VERSION
+        value: '22.22.2'
