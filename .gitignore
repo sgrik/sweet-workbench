@@ -6,3 +6,20 @@ data/
 
 # 依赖
 node_modules/
+
+# Capacitor 生成的 web 资源目录（CI 重新生成）
+www/
+
+# Android 构建产物（工程本身提交，产物忽略）
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+android/captures/
+
+# Electron 打包产物（历史，保留忽略）
+release/
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
