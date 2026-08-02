@@ -2,6 +2,9 @@
 (function() {
   'use strict';
 
+  // 离线 APK 模式标记（由 prepare-web.js 在 index.html 注入 window.IS_NATIVE_APP）
+  var IS_NATIVE_APP = !!window.IS_NATIVE_APP;
+
   // ========== 数据管理 ==========
   const STORAGE_KEY = 'sweet-workbench-data';
   const SETTINGS_KEY = 'sweet-workbench-settings';
@@ -928,6 +931,14 @@
   // 自动分析视频做法：调用后端 /api/analyze，结果写回并刷新详情
   function analyzeFoodVideos(item) {
     if (!item.videos || !item.videos.length) return;
+    if (IS_NATIVE_APP) {
+      // 离线 APK 无后端，视频自动分析不可用，直接降级为手动补充
+      item.videos.forEach(function (v) {
+        if (v.url && !v.summary) { v.analyzing = false; v.summary = { ingredients: [], steps: [], tips: '离线版不支持自动分析，请手动补充' }; }
+      });
+      saveData(); refreshFoodDetail();
+      return;
+    }
     let pending = false;
     item.videos.forEach(function (v) {
       if (v.url && !v.summary && !v.analyzing) { v.analyzing = true; pending = true; }
@@ -1454,6 +1465,7 @@
     const confirm = $('#wpConfirm'), input = $('#wpInput');
     const copy = $('#wpCopy'), change = $('#wpChange');
     if (confirm) confirm.addEventListener('click', function () {
+      if (IS_NATIVE_APP) { showToast('离线版不支持两人实时互通，请使用联网版'); return; }
       const code = (input && input.value || '').trim();
       if (!/^[a-zA-Z0-9_-]{1,32}$/.test(code)) {
         showToast('暗号仅限字母/数字/下划线，最长32位');
@@ -2293,7 +2305,7 @@
     appData.whispers.forEach(item => renderWhisper(item));
     whisperLastTs = appData.whispers.reduce(function (mx, w) { return (w.ts && w.ts > mx) ? w.ts : mx; }, 0);
     bindWhisperPair();
-    if (whisperRoom) { startWhisperSync(); startRoomDataSync(); pushDataToServer(); }
+    if (whisperRoom && !IS_NATIVE_APP) { startWhisperSync(); startRoomDataSync(); pushDataToServer(); }
     // 美食完全数据驱动：始终从数据渲染（含种子），删除后不会复活
     appData.foods.forEach(item => renderFood(item, false));
     // 时间轴完全数据驱动：从数据渲染（含种子）
