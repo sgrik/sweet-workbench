@@ -8,7 +8,7 @@ const { extract } = require('./analyze/extract');
 const { summarizeRecipe } = require('./analyze/llm');
 
 const ROOT = __dirname;
-const DATA_DIR = path.join(ROOT, 'data');
+const DATA_DIR = process.env.SWEET_DATA_DIR ? path.resolve(process.env.SWEET_DATA_DIR) : path.join(ROOT, 'data');
 const ROOM_DIR = path.join(DATA_DIR, 'rooms');
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
